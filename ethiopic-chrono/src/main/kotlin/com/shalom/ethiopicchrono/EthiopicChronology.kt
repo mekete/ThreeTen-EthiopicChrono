@@ -1,4 +1,4 @@
-package com.shalom.ethiopicchrono.javatime
+package com.shalom.ethiopicchrono
 
 import java.io.Serializable
 import java.time.Clock
