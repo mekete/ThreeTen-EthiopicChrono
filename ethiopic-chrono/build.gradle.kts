@@ -1,12 +1,9 @@
 plugins {
     id("com.android.library")
     id("org.jetbrains.kotlin.android")
-    id("org.jetbrains.kotlin.plugin.compose")
-    kotlin("plugin.serialization") version "2.0.21"
-
 }
 android {
-    namespace = "com.shalom.threeten.chrono"
+    namespace = "com.shalom.ethiopicchrono"
     compileSdk = 36
     ndkVersion = "27.0.12077973"
 
@@ -38,27 +35,15 @@ android {
     }
 
     buildFeatures {
-        viewBinding = true
-        compose = true
-    }
-
-    composeOptions {
-        kotlinCompilerExtensionVersion = "1.5.4"
+        viewBinding = false
+        compose = false
     }
 }
 
-dependencies { // AndroidX Core
-    implementation("androidx.core:core-ktx:1.17.0")
-    implementation("androidx.appcompat:appcompat:1.7.1")
-  
-    // Annotation support
+dependencies {
     implementation("androidx.annotation:annotation:1.9.1")
 
-    // ThreeTen-Extra for EthiopicDate
-    //implementation("org.threeten:threeten-extra:1.8.0")
-
-    // Testing
     testImplementation("junit:junit:4.13.2")
-    androidTestImplementation("androidx.test.ext:junit:1.3.0")
-    androidTestImplementation("androidx.test.espresso:espresso-core:3.7.0")
+    androidTestImplementation("androidx.test.ext:junit:1.2.1")
+    androidTestImplementation("androidx.test.espresso:espresso-core:3.6.1")
 }
