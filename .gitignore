@@ -13,3 +13,14 @@ captures/
 bin/
 gen/
 out/
+
+# CocoaPods
+*.podspec
+Pods/
+Podfile.lock
+.kotlin/
+
+# iOS
+*.xcworkspace
+*.xcodeproj
+DerivedData/
