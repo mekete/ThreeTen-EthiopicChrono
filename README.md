@@ -12,10 +12,12 @@ This library is a focused implementation of the Ethiopic calendar system for Kot
 - **EthiopicCalendar**: Clean, immutable API for Ethiopic dates
 - **Platform-agnostic**: Core business logic shared across all platforms
 - **Rich date operations**: Add/subtract days, months, years with proper overflow handling
+- **Date ranges**: Iterate through date ranges with for loops and range operators
+- **Utility functions**: Age calculation, leap year detection, date comparisons, and more
 - **Localization**: Built-in support for English and Amharic month names
 - **Type-safe**: Leverages Kotlin's type system for compile-time safety
 - **Lightweight**: Focused library with only Ethiopic calendar support
-- **Well-tested**: Comprehensive test suite in commonTest
+- **Well-tested**: Comprehensive test suite covering all features
 - **Legacy support**: Android-specific java.time API available for backward compatibility
 
 ## Calendar Details
@@ -137,6 +139,81 @@ println(date.isInLeapYear())  // true
 
 // Get day of year
 val dayOfYear = date.getDayOfYear()  // 1-365 or 1-366
+```
+
+### Advanced Features
+
+#### Date Ranges
+
+Iterate through date ranges with ease:
+
+```kotlin
+val start = EthiopicCalendar.of(2016, 1, 1)
+val end = EthiopicCalendar.of(2016, 1, 10)
+
+// Iterate day by day
+for (date in start..end) {
+    println(date.format())
+}
+
+// Iterate with a step
+for (date in (start..end step 3)) {
+    println(date.format()) // Days 1, 4, 7, 10
+}
+
+// Check if date is in range
+val someDate = EthiopicCalendar.of(2016, 1, 5)
+if (someDate in start..end) {
+    println("Date is in range!")
+}
+
+// Get range length
+val range = start..end
+println("Range has ${range.lengthInDays()} days")
+```
+
+#### Date Utilities
+
+Convenient utility functions for common operations:
+
+```kotlin
+val date = EthiopicCalendar.of(2016, 3, 15)
+
+// First and last days
+val firstDay = date.firstDayOfMonth()  // 2016-03-01
+val lastDay = date.lastDayOfMonth()   // 2016-03-30
+val yearStart = date.firstDayOfYear() // 2016-01-01
+val yearEnd = date.lastDayOfYear()    // 2016-13-05
+
+// All dates in a period
+val datesInMonth = EthiopicDateUtils.datesInMonth(2016, 3) // List of 30 dates
+val datesInYear = EthiopicDateUtils.datesInYear(2016)     // List of 365 dates
+
+// Date comparisons
+val date1 = EthiopicCalendar.of(2016, 1, 15)
+val date2 = EthiopicCalendar.of(2016, 3, 20)
+println(date1.isSameMonth(date2))  // false
+println(date1.isSameYear(date2))   // true
+
+// Calculate intervals
+val monthsBetween = EthiopicDateUtils.monthsBetween(date1, date2)  // 2
+val yearsBetween = EthiopicDateUtils.yearsBetween(date1, date2)    // 0
+
+// Age calculations
+val birthDate = EthiopicCalendar.of(2000, 1, 15)
+val currentDate = EthiopicCalendar.of(2016, 5, 20)
+val age = birthDate.ageAt(currentDate)  // 16
+
+// Or get current age
+val currentAge = birthDate.currentAge()
+
+// Find leap years
+val leapYears = EthiopicDateUtils.leapYearsInRange(2010, 2020)
+val nextLeap = EthiopicDateUtils.nextLeapYear(2016)     // 2019
+val prevLeap = EthiopicDateUtils.previousLeapYear(2016) // 2015
+
+// Next occurrence of a specific day
+val next15th = EthiopicDateUtils.nextDayOfMonth(date, 15)
 ```
 
 ### Platform-Specific Usage
@@ -306,15 +383,20 @@ Contributions are welcome! Please feel free to submit a Pull Request. For major 
 ## Roadmap
 
 - [x] Phase 1: Core Ethiopic calendar implementation (Android)
-- [x] Phase 2: Kotlin Multiplatform migration
+- [x] Phase 2: Kotlin Multiplatform migration with iOS support
 - [x] Phase 3: Domain layer with platform abstractions
-- [ ] Phase 4: Additional platforms (JS, Wasm)
-- [ ] Phase 5: Advanced features
-  - [ ] Date range operations
+- [x] Phase 5: Advanced features
+  - [x] Date range operations with iteration
+  - [x] Comprehensive utility functions
+  - [x] Age calculations
+  - [x] Leap year detection and queries
+- [ ] Future enhancements
   - [ ] Ethiopic holidays calculation
-  - [ ] More locales (Tigrinya, etc.)
-  - [ ] Compose Multiplatform date picker
-  - [ ] SwiftUI date picker
+  - [ ] More locales (Tigrinya, Oromo, etc.)
+  - [ ] Additional platforms (JS, Wasm, Desktop)
+  - [ ] Compose Multiplatform date picker component
+  - [ ] SwiftUI date picker component
+  - [ ] kotlinx-datetime integration
 
 ## Credits
 
