@@ -1,4 +1,4 @@
-package com.shalom.ethiopicchrono
+package com.shalom.ethiopicchrono.javatime
 
 import java.time.DateTimeException
 import java.time.chrono.Era
