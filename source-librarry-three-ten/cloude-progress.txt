@@ -1,0 +1,1622 @@
+Update Todos
+ Analyze Java source code structure and dependencies
+ Design Kotlin library architecture
+ Creating EthiopicEra enum in Kotlin
+ Create EthiopicChronology class in Kotlin
+ Create EthiopicDate class in Kotlin
+ Update build.gradle.kts configuration
+ Build and verify the library compiles
+ Commit and push the changes
+Let me start by creating the EthiopicEra enum:
+
+Write
+/home/user/ThreeTen-EthiopicChrono/ethiopic-chrono/src/main/java/com/shalom/threeten/chrono/EthiopicEra.kt
+ 
+package com.shalom.threeten.chrono
+
+ 
+
+import java.time.DateTimeException
+
+import java.time.chrono.Era
+
+  
+
+enum class EthiopicEra : Era {
+ 
+
+    BEFORE_INCARNATION,
+
+  
+
+    INCARNATION;
+
+ 
+ 
+
+    override fun getValue(): Int = ordinal
+
+ 
+
+    companion object {
+ 
+
+        @JvmStatic
+
+        fun of(era: Int): EthiopicEra = when (era) {
+
+            0 -> BEFORE_INCARNATION
+
+            1 -> INCARNATION
+
+            else -> throw DateTimeException("Invalid era: $era")
+
+        }
+
+    }
+
+}
+
+ 
+
+Update Todos
+ Analyze Java source code structure and dependencies
+ Design Kotlin library architecture
+ Create EthiopicEra enum in Kotlin
+ Creating EthiopicChronology class in Kotlin
+ Create EthiopicDate class in Kotlin
+ Update build.gradle.kts configuration
+ Build and verify the library compiles
+ Commit and push the changes
+Now let me create the EthiopicChronology class:
+
+Write
+/home/user/ThreeTen-EthiopicChrono/ethiopic-chrono/src/main/java/com/shalom/threeten/chrono/EthiopicChronology.kt
+ 
+
+package com.shalom.threeten.chrono
+
+ 
+
+import java.io.Serializable
+
+import java.time.Clock
+
+import java.time.DateTimeException
+
+import java.time.Instant
+
+import java.time.ZoneId
+
+import java.time.chrono.AbstractChronology
+
+import java.time.chrono.ChronoLocalDateTime
+
+import java.time.chrono.ChronoZonedDateTime
+
+import java.time.chrono.Era
+
+import java.time.format.ResolverStyle
+
+import java.time.temporal.ChronoField
+
+import java.time.temporal.TemporalAccessor
+
+import java.time.temporal.TemporalField
+
+import java.time.temporal.ValueRange
+
+  
+class EthiopicChronology private constructor() : AbstractChronology(), Serializable {
+
+ 
+
+    companion object {
+
+        
+        @JvmField
+
+        val INSTANCE = EthiopicChronology()
+ 
+
+        private const val serialVersionUID = 53287687268768L
+
+  
+
+        @JvmField
+
+        val YEAR_RANGE: ValueRange = ValueRange.of(-999_998, 999_999)
+
+  
+
+        @JvmField
+
+        val YOE_RANGE: ValueRange = ValueRange.of(1, 999_999)
+ 
+
+        @JvmField
+
+        val PROLEPTIC_MONTH_RANGE: ValueRange = ValueRange.of(-999_998 * 13L, 999_999 * 13L + 12)
+ 
+
+        @JvmField
+
+        val MOY_RANGE: ValueRange = ValueRange.of(1, 13)
+
+  
+        @JvmField
+
+        val ALIGNED_WOM_RANGE: ValueRange = ValueRange.of(1, 1, 5)
+
+  
+        @JvmField
+
+        val DOM_RANGE: ValueRange = ValueRange.of(1, 5, 30)
+
+  
+
+        @JvmField
+
+        val DOM_RANGE_NONLEAP: ValueRange = ValueRange.of(1, 5)
+
+  
+
+        @JvmField
+
+        val DOM_RANGE_LEAP: ValueRange = ValueRange.of(1, 6)
+
+    }
+ 
+    private fun readResolve(): Any = INSTANCE
+
+  
+
+    override fun getId(): String = "Ethiopic"
+
+  
+
+    override fun getCalendarType(): String = "ethiopic"
+
+  
+
+    override fun isLeapYear(prolepticYear: Long): Boolean =
+
+        Math.floorMod(prolepticYear, 4) == 3L
+
+  
+
+    override fun date(era: Era, yearOfEra: Int, month: Int, dayOfMonth: Int): EthiopicDate {
+
+        return date(prolepticYear(era, yearOfEra), month, dayOfMonth)
+
+    }
+ 
+
+    override fun date(prolepticYear: Int, month: Int, dayOfMonth: Int): EthiopicDate {
+
+        return EthiopicDate.of(prolepticYear, month, dayOfMonth)
+
+    }
+
+  
+
+    override fun dateYearDay(era: Era, yearOfEra: Int, dayOfYear: Int): EthiopicDate {
+
+        return dateYearDay(prolepticYear(era, yearOfEra), dayOfYear)
+
+    }
+
+  
+
+    override fun dateYearDay(prolepticYear: Int, dayOfYear: Int): EthiopicDate {
+
+        return EthiopicDate.ofYearDay(prolepticYear, dayOfYear)
+
+    }
+
+ 
+    override fun dateEpochDay(epochDay: Long): EthiopicDate {
+
+        return EthiopicDate.ofEpochDay(epochDay)
+
+    }
+
+  
+
+    override fun dateNow(): EthiopicDate {
+
+        return EthiopicDate.now()
+
+    }
+
+  
+
+    override fun dateNow(zone: ZoneId): EthiopicDate {
+
+        return EthiopicDate.now(zone)
+
+    }
+
+ 
+ 
+
+    override fun dateNow(clock: Clock): EthiopicDate {
+
+        return EthiopicDate.now(clock)
+
+    }
+
+ 
+
+    override fun date(temporal: TemporalAccessor): EthiopicDate {
+
+        return EthiopicDate.from(temporal)
+
+    }
+
+ 
+
+    @Suppress("UNCHECKED_CAST")
+
+    override fun localDateTime(temporal: TemporalAccessor): ChronoLocalDateTime<EthiopicDate> {
+
+        return super.localDateTime(temporal) as ChronoLocalDateTime<EthiopicDate>
+
+    }
+
+ 
+    @Suppress("UNCHECKED_CAST")
+
+    override fun zonedDateTime(temporal: TemporalAccessor): ChronoZonedDateTime<EthiopicDate> {
+
+        return super.zonedDateTime(temporal) as ChronoZonedDateTime<EthiopicDate>
+
+    }
+
+ 
+
+    /**
+
+     * Obtains a Ethiopic zoned date-time in this chronology from an [Instant].
+
+     *
+
+     * @param instant the instant to create the date-time from, not null
+
+     * @param zone the time-zone, not null
+
+     * @return the Ethiopic zoned date-time, not null
+
+     * @throws DateTimeException if the result exceeds the supported range
+
+     */
+
+    @Suppress("UNCHECKED_CAST")
+
+    override fun zonedDateTime(instant: Instant, zone: ZoneId): ChronoZonedDateTime<EthiopicDate> {
+
+        return super.zonedDateTime(instant, zone) as ChronoZonedDateTime<EthiopicDate>
+
+    }
+
+ 
+
+    override fun prolepticYear(era: Era, yearOfEra: Int): Int {
+
+        if (era !is EthiopicEra) {
+
+            throw ClassCastException("Era must be EthiopicEra")
+
+        }
+
+        return if (era == EthiopicEra.INCARNATION) yearOfEra else 1 - yearOfEra
+
+    }
+
+ 
+
+    override fun eraOf(eraValue: Int): EthiopicEra {
+
+        return EthiopicEra.of(eraValue)
+
+    }
+
+ 
+
+    override fun eras(): List<Era> {
+
+        return listOf(EthiopicEra.BEFORE_INCARNATION, EthiopicEra.INCARNATION)
+
+    }
+
+ 
+
+    override fun range(field: ChronoField): ValueRange {
+
+        return when (field) {
+
+            ChronoField.DAY_OF_MONTH -> DOM_RANGE
+
+            ChronoField.ALIGNED_WEEK_OF_MONTH -> ALIGNED_WOM_RANGE
+
+            ChronoField.MONTH_OF_YEAR -> MOY_RANGE
+
+            ChronoField.PROLEPTIC_MONTH -> PROLEPTIC_MONTH_RANGE
+
+            ChronoField.YEAR_OF_ERA -> YOE_RANGE
+
+            ChronoField.YEAR -> YEAR_RANGE
+
+            else -> field.range()
+
+        }
+
+    }
+
+ 
+
+    override fun resolveDate(
+
+        fieldValues: MutableMap<TemporalField, Long>,
+
+        resolverStyle: ResolverStyle
+
+    ): EthiopicDate {
+
+        return super.resolveDate(fieldValues, resolverStyle) as EthiopicDate
+
+    }
+
+}
+
+ 
+
+Update Todos
+ Analyze Java source code structure and dependencies
+ Design Kotlin library architecture
+ Create EthiopicEra enum in Kotlin
+ Create EthiopicChronology class in Kotlin
+ Creating EthiopicDate class in Kotlin
+ Update build.gradle.kts configuration
+ Build and verify the library compiles
+ Commit and push the changes
+Now let me create the comprehensive EthiopicDate class. This will be a longer file:
+
+Write
+/home/user/ThreeTen-EthiopicChrono/ethiopic-chrono/src/main/java/com/shalom/threeten/chrono/EthiopicDate.kt
+/*
+
+ * Copyright (c) 2007-present, Stephen Colebourne & Michael Nascimento Santos
+
+ *
+
+ * All rights reserved.
+
+ *
+
+ * Redistribution and use in source and binary forms, with or without
+
+ * modification, are permitted provided that the following conditions are met:
+
+ *
+
+ *  * Redistributions of source code must retain the above copyright notice,
+
+ *    this list of conditions and the following disclaimer.
+
+ *
+
+ *  * Redistributions in binary form must reproduce the above copyright notice,
+
+ *    this list of conditions and the following disclaimer in the documentation
+
+ *    and/or other materials provided with the distribution.
+
+ *
+
+ *  * Neither the name of JSR-310 nor the names of its contributors
+
+ *    may be used to endorse or promote products derived from this software
+
+ *    without specific prior written permission.
+
+ *
+
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+
+ * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+
+ * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+
+ * A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR
+
+ * CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+
+ * EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+
+ * PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
+
+ * PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
+
+ * LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
+
+ * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+
+ * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+ */
+
+package com.shalom.threeten.chrono
+
+ 
+
+import java.io.Serializable
+
+import java.time.Clock
+
+import java.time.DateTimeException
+
+import java.time.LocalDate
+
+import java.time.LocalTime
+
+import java.time.ZoneId
+
+import java.time.chrono.ChronoLocalDate
+
+import java.time.chrono.ChronoLocalDateTime
+
+import java.time.chrono.ChronoPeriod
+
+import java.time.temporal.ChronoField
+
+import java.time.temporal.ChronoUnit
+
+import java.time.temporal.Temporal
+
+import java.time.temporal.TemporalAccessor
+
+import java.time.temporal.TemporalAdjuster
+
+import java.time.temporal.TemporalAmount
+
+import java.time.temporal.TemporalField
+
+import java.time.temporal.TemporalQuery
+
+import java.time.temporal.TemporalUnit
+
+import java.time.temporal.UnsupportedTemporalTypeException
+
+import java.time.temporal.ValueRange
+
+import kotlin.math.abs
+
+ 
+
+/**
+
+ * A date in the Ethiopic calendar system.
+
+ *
+
+ * This date operates using the [EthiopicChronology] Ethiopic calendar.
+
+ * This calendar system is primarily used in Ethiopia.
+
+ * Dates are aligned such that `0001-01-01 (Ethiopic)` is `0008-08-27 (ISO)`.
+
+ *
+
+ * This class is immutable and thread-safe.
+
+ *
+
+ * This class must be treated as a value type. Do not synchronize, rely on the
+
+ * identity hash code or use the distinction between equals() and ==.
+
+ */
+
+class EthiopicDate private constructor(
+
+    private val prolepticYear: Int,
+
+    private val month: Int,
+
+    private val day: Int
+
+) : ChronoLocalDate, Serializable {
+
+ 
+
+    companion object {
+
+        /**
+
+         * Serialization version.
+
+         */
+
+        private const val serialVersionUID = -268768729L
+
+ 
+
+        /**
+
+         * The difference between the ISO and Ethiopic epoch day count.
+
+         */
+
+        private const val EPOCH_DAY_DIFFERENCE = 716367
+
+ 
+
+        /**
+
+         * Obtains the current [EthiopicDate] from the system clock in the default time-zone.
+
+         *
+
+         * This will query the [Clock.systemDefaultZone] system clock in the default
+
+         * time-zone to obtain the current date.
+
+         *
+
+         * Using this method will prevent the ability to use an alternate clock for testing
+
+         * because the clock is hard-coded.
+
+         *
+
+         * @return the current date using the system clock and default time-zone, not null
+
+         */
+
+        @JvmStatic
+
+        fun now(): EthiopicDate = now(Clock.systemDefaultZone())
+
+ 
+
+        /**
+
+         * Obtains the current [EthiopicDate] from the system clock in the specified time-zone.
+
+         *
+
+         * This will query the [Clock.system] system clock to obtain the current date.
+
+         * Specifying the time-zone avoids dependence on the default time-zone.
+
+         *
+
+         * Using this method will prevent the ability to use an alternate clock for testing
+
+         * because the clock is hard-coded.
+
+         *
+
+         * @param zone the zone ID to use, not null
+
+         * @return the current date using the system clock, not null
+
+         */
+
+        @JvmStatic
+
+        fun now(zone: ZoneId): EthiopicDate = now(Clock.system(zone))
+
+ 
+
+        /**
+
+         * Obtains the current [EthiopicDate] from the specified clock.
+
+         *
+
+         * This will query the specified clock to obtain the current date - today.
+
+         * Using this method allows the use of an alternate clock for testing.
+
+         * The alternate clock may be introduced using [Clock] dependency injection.
+
+         *
+
+         * @param clock the clock to use, not null
+
+         * @return the current date, not null
+
+         * @throws DateTimeException if the current date cannot be obtained
+
+         */
+
+        @JvmStatic
+
+        fun now(clock: Clock): EthiopicDate {
+
+            val now = LocalDate.now(clock)
+
+            return ofEpochDay(now.toEpochDay())
+
+        }
+
+ 
+
+        /**
+
+         * Obtains a [EthiopicDate] representing a date in the Ethiopic calendar
+
+         * system from the proleptic-year, month-of-year and day-of-month fields.
+
+         *
+
+         * This returns a [EthiopicDate] with the specified fields.
+
+         * The day must be valid for the year and month, otherwise an exception will be thrown.
+
+         *
+
+         * @param prolepticYear the Ethiopic proleptic-year
+
+         * @param month the Ethiopic month-of-year, from 1 to 13
+
+         * @param dayOfMonth the Ethiopic day-of-month, from 1 to 30
+
+         * @return the date in Ethiopic calendar system, not null
+
+         * @throws DateTimeException if the value of any field is out of range,
+
+         *  or if the day-of-month is invalid for the month-year
+
+         */
+
+        @JvmStatic
+
+        fun of(prolepticYear: Int, month: Int, dayOfMonth: Int): EthiopicDate {
+
+            return create(prolepticYear, month, dayOfMonth)
+
+        }
+
+ 
+
+        /**
+
+         * Obtains a [EthiopicDate] from a temporal object.
+
+         *
+
+         * This obtains a date in the Ethiopic calendar system based on the specified temporal.
+
+         * A [TemporalAccessor] represents an arbitrary set of date and time information,
+
+         * which this factory converts to an instance of [EthiopicDate].
+
+         *
+
+         * The conversion typically uses the [ChronoField.EPOCH_DAY] field,
+
+         * which is standardized across calendar systems.
+
+         *
+
+         * This method matches the signature of the functional interface [TemporalQuery]
+
+         * allowing it to be used as a query via method reference, `EthiopicDate::from`.
+
+         *
+
+         * @param temporal the temporal object to convert, not null
+
+         * @return the date in Ethiopic calendar system, not null
+
+         * @throws DateTimeException if unable to convert to a [EthiopicDate]
+
+         */
+
+        @JvmStatic
+
+        fun from(temporal: TemporalAccessor): EthiopicDate {
+
+            if (temporal is EthiopicDate) {
+
+                return temporal
+
+            }
+
+            return ofEpochDay(temporal.getLong(ChronoField.EPOCH_DAY))
+
+        }
+
+ 
+
+        /**
+
+         * Obtains a [EthiopicDate] representing a date in the Ethiopic calendar
+
+         * system from the proleptic-year and day-of-year fields.
+
+         *
+
+         * This returns a [EthiopicDate] with the specified fields.
+
+         * The day must be valid for the year, otherwise an exception will be thrown.
+
+         *
+
+         * @param prolepticYear the Ethiopic proleptic-year
+
+         * @param dayOfYear the Ethiopic day-of-year, from 1 to 366
+
+         * @return the date in Ethiopic calendar system, not null
+
+         * @throws DateTimeException if the value of any field is out of range,
+
+         *  or if the day-of-year is invalid for the year
+
+         */
+
+        @JvmStatic
+
+        fun ofYearDay(prolepticYear: Int, dayOfYear: Int): EthiopicDate {
+
+            EthiopicChronology.YEAR_RANGE.checkValidValue(prolepticYear.toLong(), ChronoField.YEAR)
+
+            ChronoField.DAY_OF_YEAR.range().checkValidValue(dayOfYear.toLong(), ChronoField.DAY_OF_YEAR)
+
+            if (dayOfYear == 366 && !EthiopicChronology.INSTANCE.isLeapYear(prolepticYear.toLong())) {
+
+                throw DateTimeException("Invalid date 'Pagumen 6' as '$prolepticYear' is not a leap year")
+
+            }
+
+            return EthiopicDate(prolepticYear, (dayOfYear - 1) / 30 + 1, (dayOfYear - 1) % 30 + 1)
+
+        }
+
+ 
+
+        /**
+
+         * Obtains a [EthiopicDate] representing a date in the Ethiopic calendar
+
+         * system from the epoch-day.
+
+         *
+
+         * @param epochDay the epoch day to convert based on 1970-01-01 (ISO)
+
+         * @return the date in Ethiopic calendar system, not null
+
+         * @throws DateTimeException if the epoch-day is out of range
+
+         */
+
+        @JvmStatic
+
+        fun ofEpochDay(epochDay: Long): EthiopicDate {
+
+            ChronoField.EPOCH_DAY.range().checkValidValue(epochDay, ChronoField.EPOCH_DAY)
+
+            var ethiopicED = epochDay + EPOCH_DAY_DIFFERENCE
+
+            var adjustment = 0
+
+            if (ethiopicED < 0) {
+
+                ethiopicED += (1461L * (1_000_000L / 4))
+
+                adjustment = -1_000_000
+
+            }
+
+            val prolepticYear = (((ethiopicED * 4) + 1463) / 1461).toInt()
+
+            val startYearEpochDay = (prolepticYear - 1) * 365 + (prolepticYear / 4)
+
+            val doy0 = (ethiopicED - startYearEpochDay).toInt()
+
+            val month = doy0 / 30 + 1
+
+            val dom = doy0 % 30 + 1
+
+            return EthiopicDate(prolepticYear + adjustment, month, dom)
+
+        }
+
+ 
+
+        private fun resolvePreviousValid(prolepticYear: Int, month: Int, day: Int): EthiopicDate {
+
+            var adjustedDay = day
+
+            if (month == 13 && day > 5) {
+
+                adjustedDay = if (EthiopicChronology.INSTANCE.isLeapYear(prolepticYear.toLong())) 6 else 5
+
+            }
+
+            return EthiopicDate(prolepticYear, month, adjustedDay)
+
+        }
+
+ 
+
+        /**
+
+         * Creates a [EthiopicDate] validating the input.
+
+         *
+
+         * @param prolepticYear the Ethiopic proleptic-year
+
+         * @param month the Ethiopic month-of-year, from 1 to 13
+
+         * @param dayOfMonth the Ethiopic day-of-month, from 1 to 30
+
+         * @return the date in Ethiopic calendar system, not null
+
+         * @throws DateTimeException if the value of any field is out of range,
+
+         *  or if the day-of-year is invalid for the month-year
+
+         */
+
+        private fun create(prolepticYear: Int, month: Int, dayOfMonth: Int): EthiopicDate {
+
+            EthiopicChronology.YEAR_RANGE.checkValidValue(prolepticYear.toLong(), ChronoField.YEAR)
+
+            EthiopicChronology.MOY_RANGE.checkValidValue(month.toLong(), ChronoField.MONTH_OF_YEAR)
+
+            EthiopicChronology.DOM_RANGE.checkValidValue(dayOfMonth.toLong(), ChronoField.DAY_OF_MONTH)
+
+ 
+
+            if (month == 13 && dayOfMonth > 5) {
+
+                if (EthiopicChronology.INSTANCE.isLeapYear(prolepticYear.toLong())) {
+
+                    if (dayOfMonth > 6) {
+
+                        throw DateTimeException("Invalid date 'Pagumen $dayOfMonth', valid range from 1 to 5, or 1 to 6 in a leap year")
+
+                    }
+
+                } else {
+
+                    if (dayOfMonth == 6) {
+
+                        throw DateTimeException("Invalid date 'Pagumen 6' as '$prolepticYear' is not a leap year")
+
+                    } else {
+
+                        throw DateTimeException("Invalid date 'Pagumen $dayOfMonth', valid range from 1 to 5, or 1 to 6 in a leap year")
+
+                    }
+
+                }
+
+            }
+
+            return EthiopicDate(prolepticYear, month, dayOfMonth)
+
+        }
+
+    }
+
+ 
+
+    /**
+
+     * Validates the object.
+
+     */
+
+    private fun readResolve(): Any = create(prolepticYear, month, day)
+
+ 
+
+    // ChronoLocalDate implementation
+
+    override fun getChronology(): EthiopicChronology = EthiopicChronology.INSTANCE
+
+ 
+
+    /**
+
+     * Gets the era applicable at this date.
+
+     *
+
+     * The Ethiopic calendar system has two eras, 'INCARNATION' and 'BEFORE_INCARNATION',
+
+     * defined by [EthiopicEra].
+
+     *
+
+     * @return the era applicable at this date, not null
+
+     */
+
+    override fun getEra(): EthiopicEra =
+
+        if (prolepticYear >= 1) EthiopicEra.INCARNATION else EthiopicEra.BEFORE_INCARNATION
+
+ 
+
+    fun lengthOfMonth(): Int {
+
+        return if (month == 13) {
+
+            if (isLeapYear) 6 else 5
+
+        } else {
+
+            30
+
+        }
+
+    }
+
+ 
+
+    override fun lengthOfYear(): Int =
+
+        if (EthiopicChronology.INSTANCE.isLeapYear(prolepticYear.toLong())) 366 else 365
+
+ 
+
+    override fun range(field: TemporalField): ValueRange {
+
+        if (field is ChronoField) {
+
+            if (isSupported(field)) {
+
+                return when (field) {
+
+                    ChronoField.DAY_OF_MONTH -> ValueRange.of(1, lengthOfMonth().toLong())
+
+                    ChronoField.DAY_OF_YEAR -> ValueRange.of(1, lengthOfYear().toLong())
+
+                    ChronoField.ALIGNED_WEEK_OF_MONTH ->
+
+                        ValueRange.of(1, if (month == 13) 1 else 5)
+
+                    else -> chronology.range(field)
+
+                }
+
+            }
+
+            throw UnsupportedTemporalTypeException("Unsupported field: $field")
+
+        }
+
+        return field.rangeRefinedBy(this)
+
+    }
+
+ 
+
+    override fun getLong(field: TemporalField): Long {
+
+        if (field is ChronoField) {
+
+            return when (field) {
+
+                ChronoField.DAY_OF_WEEK -> dayOfWeek.toLong()
+
+                ChronoField.ALIGNED_DAY_OF_WEEK_IN_MONTH -> ((day - 1) % 7 + 1).toLong()
+
+                ChronoField.ALIGNED_DAY_OF_WEEK_IN_YEAR -> ((dayOfYear - 1) % 7 + 1).toLong()
+
+                ChronoField.DAY_OF_MONTH -> day.toLong()
+
+                ChronoField.DAY_OF_YEAR -> dayOfYear.toLong()
+
+                ChronoField.EPOCH_DAY -> toEpochDay()
+
+                ChronoField.ALIGNED_WEEK_OF_MONTH -> ((day - 1) / 7 + 1).toLong()
+
+                ChronoField.ALIGNED_WEEK_OF_YEAR -> ((dayOfYear - 1) / 7 + 1).toLong()
+
+                ChronoField.MONTH_OF_YEAR -> month.toLong()
+
+                ChronoField.PROLEPTIC_MONTH -> prolepticMonth
+
+                ChronoField.YEAR_OF_ERA -> yearOfEra.toLong()
+
+                ChronoField.YEAR -> prolepticYear.toLong()
+
+                ChronoField.ERA -> if (prolepticYear >= 1) 1L else 0L
+
+                else -> throw UnsupportedTemporalTypeException("Unsupported field: $field")
+
+            }
+
+        }
+
+        return field.getFrom(this)
+
+    }
+
+ 
+
+    private val dayOfYear: Int
+
+        get() = (month - 1) * 30 + day
+
+ 
+
+    private val dayOfWeek: Int
+
+        get() = (Math.floorMod(toEpochDay() + 3, 7) + 1).toInt()
+
+ 
+
+    private val prolepticMonth: Long
+
+        get() = prolepticYear * 13L + month - 1
+
+ 
+
+    private val yearOfEra: Int
+
+        get() = if (prolepticYear >= 1) prolepticYear else 1 - prolepticYear
+
+ 
+
+    override fun toEpochDay(): Long {
+
+        val year = prolepticYear.toLong()
+
+        val calendarEpochDay = ((year - 1) * 365) + Math.floorDiv(year, 4) + (dayOfYear - 1)
+
+        return calendarEpochDay - EPOCH_DAY_DIFFERENCE
+
+    }
+
+ 
+
+    override fun with(adjuster: TemporalAdjuster): EthiopicDate {
+
+        return adjuster.adjustInto(this) as EthiopicDate
+
+    }
+
+ 
+
+    override fun with(field: TemporalField, newValue: Long): EthiopicDate {
+
+        if (field is ChronoField) {
+
+            chronology.range(field).checkValidValue(newValue, field)
+
+            val nvalue = newValue.toInt()
+
+            return when (field) {
+
+                ChronoField.DAY_OF_WEEK -> plusDays(newValue - dayOfWeek)
+
+                ChronoField.ALIGNED_DAY_OF_WEEK_IN_MONTH ->
+
+                    plusDays(newValue - getLong(ChronoField.ALIGNED_DAY_OF_WEEK_IN_MONTH))
+
+                ChronoField.ALIGNED_DAY_OF_WEEK_IN_YEAR ->
+
+                    plusDays(newValue - getLong(ChronoField.ALIGNED_DAY_OF_WEEK_IN_YEAR))
+
+                ChronoField.DAY_OF_MONTH -> resolvePreviousValid(prolepticYear, month, nvalue)
+
+                ChronoField.DAY_OF_YEAR -> withDayOfYear(nvalue)
+
+                ChronoField.EPOCH_DAY -> ofEpochDay(newValue)
+
+                ChronoField.ALIGNED_WEEK_OF_MONTH ->
+
+                    plusDays((newValue - getLong(ChronoField.ALIGNED_WEEK_OF_MONTH)) * 7)
+
+                ChronoField.ALIGNED_WEEK_OF_YEAR ->
+
+                    plusDays((newValue - getLong(ChronoField.ALIGNED_WEEK_OF_YEAR)) * 7)
+
+                ChronoField.MONTH_OF_YEAR -> resolvePreviousValid(prolepticYear, nvalue, day)
+
+                ChronoField.PROLEPTIC_MONTH -> plusMonths(newValue - prolepticMonth)
+
+                ChronoField.YEAR_OF_ERA ->
+
+                    resolvePreviousValid(if (prolepticYear >= 1) nvalue else 1 - nvalue, month, day)
+
+                ChronoField.YEAR -> resolvePreviousValid(nvalue, month, day)
+
+                ChronoField.ERA ->
+
+                    if (newValue == getLong(ChronoField.ERA)) this
+
+                    else resolvePreviousValid(1 - prolepticYear, month, day)
+
+                else -> throw UnsupportedTemporalTypeException("Unsupported field: $field")
+
+            }
+
+        }
+
+        return field.adjustInto(this, newValue) as EthiopicDate
+
+    }
+
+ 
+
+    private fun withDayOfYear(value: Int): EthiopicDate {
+
+        return resolvePreviousValid(prolepticYear, ((value - 1) / 30) + 1, ((value - 1) % 30) + 1)
+
+    }
+
+ 
+
+    override fun plus(amountToAdd: TemporalAmount): EthiopicDate {
+
+        return amountToAdd.addTo(this) as EthiopicDate
+
+    }
+
+ 
+
+    override fun plus(amountToAdd: Long, unit: TemporalUnit): EthiopicDate {
+
+        if (unit is ChronoUnit) {
+
+            return when (unit) {
+
+                ChronoUnit.DAYS -> plusDays(amountToAdd)
+
+                ChronoUnit.WEEKS -> plusWeeks(amountToAdd)
+
+                ChronoUnit.MONTHS -> plusMonths(amountToAdd)
+
+                ChronoUnit.YEARS -> plusYears(amountToAdd)
+
+                ChronoUnit.DECADES -> plusYears(Math.multiplyExact(amountToAdd, 10))
+
+                ChronoUnit.CENTURIES -> plusYears(Math.multiplyExact(amountToAdd, 100))
+
+                ChronoUnit.MILLENNIA -> plusYears(Math.multiplyExact(amountToAdd, 1000))
+
+                ChronoUnit.ERAS -> with(ChronoField.ERA, Math.addExact(getLong(ChronoField.ERA), amountToAdd))
+
+                else -> throw UnsupportedTemporalTypeException("Unsupported unit: $unit")
+
+            }
+
+        }
+
+        return unit.addTo(this, amountToAdd) as EthiopicDate
+
+    }
+
+ 
+
+    override fun minus(amountToSubtract: TemporalAmount): EthiopicDate {
+
+        return amountToSubtract.subtractFrom(this) as EthiopicDate
+
+    }
+
+ 
+
+    override fun minus(amountToSubtract: Long, unit: TemporalUnit): EthiopicDate {
+
+        return if (amountToSubtract == Long.MIN_VALUE) {
+
+            plus(Long.MAX_VALUE, unit).plus(1, unit)
+
+        } else {
+
+            plus(-amountToSubtract, unit)
+
+        }
+
+    }
+
+ 
+
+    private fun plusYears(yearsToAdd: Long): EthiopicDate {
+
+        if (yearsToAdd == 0L) return this
+
+        val newYear = ChronoField.YEAR.checkValidIntValue(Math.addExact(prolepticYear.toLong(), yearsToAdd))
+
+        return resolvePreviousValid(newYear, month, day)
+
+    }
+
+ 
+
+    private fun plusMonths(months: Long): EthiopicDate {
+
+        if (months == 0L) return this
+
+        val curEm = prolepticMonth
+
+        val calcEm = Math.addExact(curEm, months)
+
+        val newYear = Math.toIntExact(Math.floorDiv(calcEm, 13))
+
+        val newMonth = (Math.floorMod(calcEm, 13) + 1).toInt()
+
+        return resolvePreviousValid(newYear, newMonth, day)
+
+    }
+
+ 
+
+    private fun plusWeeks(amountToAdd: Long): EthiopicDate {
+
+        return plusDays(Math.multiplyExact(amountToAdd, 7))
+
+    }
+
+ 
+
+    private fun plusDays(days: Long): EthiopicDate {
+
+        if (days == 0L) return this
+
+        return ofEpochDay(Math.addExact(toEpochDay(), days))
+
+    }
+
+ 
+
+    @Suppress("UNCHECKED_CAST")
+
+    override fun atTime(localTime: LocalTime): ChronoLocalDateTime<EthiopicDate> {
+
+        return super.atTime(localTime) as ChronoLocalDateTime<EthiopicDate>
+
+    }
+
+ 
+
+    override fun until(endExclusive: Temporal, unit: TemporalUnit): Long {
+
+        val end = from(endExclusive)
+
+        if (unit is ChronoUnit) {
+
+            return when (unit) {
+
+                ChronoUnit.DAYS -> daysUntil(end)
+
+                ChronoUnit.WEEKS -> daysUntil(end) / 7
+
+                ChronoUnit.MONTHS -> monthsUntil(end)
+
+                ChronoUnit.YEARS -> monthsUntil(end) / 13
+
+                ChronoUnit.DECADES -> monthsUntil(end) / 130
+
+                ChronoUnit.CENTURIES -> monthsUntil(end) / 1300
+
+                ChronoUnit.MILLENNIA -> monthsUntil(end) / 13000
+
+                ChronoUnit.ERAS -> end.getLong(ChronoField.ERA) - getLong(ChronoField.ERA)
+
+                else -> throw UnsupportedTemporalTypeException("Unsupported unit: $unit")
+
+            }
+
+        }
+
+        return unit.between(this, end)
+
+    }
+
+ 
+
+    override fun until(endDateExclusive: ChronoLocalDate): ChronoPeriod {
+
+        val end = from(endDateExclusive)
+
+        var totalMonths = end.prolepticMonth - this.prolepticMonth
+
+        var days = end.day - this.day
+
+        if (totalMonths > 0 && days < 0) {
+
+            totalMonths--
+
+            val calcDate = this.plusMonths(totalMonths)
+
+            days = (end.toEpochDay() - calcDate.toEpochDay()).toInt()
+
+        } else if (totalMonths < 0 && days > 0) {
+
+            totalMonths++
+
+            days -= end.lengthOfMonth()
+
+        }
+
+        val years = totalMonths / 13
+
+        val months = (totalMonths % 13).toInt()
+
+        return chronology.period(Math.toIntExact(years), months, days)
+
+    }
+
+ 
+
+    private fun daysUntil(end: ChronoLocalDate): Long {
+
+        return end.toEpochDay() - toEpochDay()
+
+    }
+
+ 
+
+    private fun monthsUntil(end: EthiopicDate): Long {
+
+        val packed1 = prolepticMonth * 256L + day
+
+        val packed2 = end.prolepticMonth * 256L + end.day
+
+        return (packed2 - packed1) / 256L
+
+    }
+
+ 
+
+    override fun equals(other: Any?): Boolean {
+
+        if (this === other) return true
+
+        if (other !is EthiopicDate) return false
+
+        return prolepticYear == other.prolepticYear &&
+
+                month == other.month &&
+
+                day == other.day
+
+    }
+
+ 
+
+    override fun hashCode(): Int {
+
+        val yearValue = prolepticYear
+
+        val monthValue = month
+
+        val dayValue = day
+
+        return chronology.id.hashCode() xor
+
+                ((yearValue and 0xFFFFF800.toInt()) xor ((yearValue shl 11) +
+
+                        (monthValue shl 6) + dayValue))
+
+    }
+
+ 
+
+    override fun toString(): String {
+
+        val buf = StringBuilder(30)
+
+        buf.append(chronology.toString())
+
+            .append(" ")
+
+            .append(era)
+
+            .append(" ")
+
+            .append(yearOfEra)
+
+        if (month < 10) buf.append("-0") else buf.append("-")
+
+        buf.append(month)
+
+        if (day < 10) buf.append("-0") else buf.append("-")
+
+        buf.append(day)
+
+        return buf.toString()
+
+    }
+
+}
+
+ 
+
+Update Todos
+ Analyze Java source code structure and dependencies
+ Design Kotlin library architecture
+ Create EthiopicEra enum in Kotlin
+ Create EthiopicChronology class in Kotlin
+ Create EthiopicDate class in Kotlin
+ Updating build.gradle.kts configuration
+ Build and verify the library compiles
+ Commit and push the changes
+Let me check the project structure and ensure we have the necessary build files:
+
+Bash
+ls -la /home/user/ThreeTen-EthiopicChrono/
+drwxr-xr-x 8 root root 4096 Nov 18 08:10 .git
+drwxr-xr-x 3 root root 4096 Nov 18 08:10 ethiopic-chrono
+drwxr-xr-x 3 root root 4096 Nov 18 08:10 source-librarry-three-ten
+... +3 lines
+Let me create the necessary root-level Gradle files to make this a proper Android library project:
+
+Write
+/home/user/ThreeTen-EthiopicChrono/settings.gradle.kts
+pluginManagement {
+
+    repositories {
+
+        google()
+
+        mavenCentral()
+
+        gradlePluginPortal()
+
+    }
+
+}
+
+ 
+
+dependencyResolutionManagement {
+
+    repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
+
+    repositories {
+
+        google()
+
+        mavenCentral()
+
+    }
+
+}
+
+ 
+
+rootProject.name = "EthiopicChrono"
+
+include(":ethiopic-chrono")
+
+ 
+
+Write
+/home/user/ThreeTen-EthiopicChrono/build.gradle.kts
+// Top-level build file where you can add configuration options common to all sub-projects/modules.
+
+plugins {
+
+    id("com.android.library") version "8.7.3" apply false
+
+    id("org.jetbrains.kotlin.android") version "2.0.21" apply false
+
+    id("org.jetbrains.kotlin.plugin.compose") version "2.0.21" apply false
+
+    id("org.jetbrains.kotlin.plugin.serialization") version "2.0.21" apply false
+
+}
+
+ 
+
+Let me check for Gradle wrapper:
+
+Bash
+ls -la /home/user/ThreeTen-EthiopicChrono/ | grep gradle
+-rw-r--r-- 1 root root  394 Nov 18 08:16 build.gradle.kts
+-rw-r--r-- 1 root root  346 Nov 18 08:16 settings.gradle.kts
+Let me create the Gradle wrapper files:
+
+Write
+/home/user/ThreeTen-EthiopicChrono/gradle.properties
+# Project-wide Gradle settings.
+
+# IDE (e.g. Android Studio) users:
+
+# Gradle settings configured through the IDE *will override*
+
+# any settings specified in this file.
+
+# For more details on how to configure your build environment visit
+
+# http://www.gradle.org/docs/current/userguide/build_environment.html
+
+ 
+
+# Specifies the JVM arguments used for the daemon process.
+
+# The setting is particularly useful for tweaking memory settings.
+
+org.gradle.jvmargs=-Xmx2048m -Dfile.encoding=UTF-8
+
+ 
+
+# When configured, Gradle will run in incubating parallel mode.
+
+# This option should only be used with decoupled projects. More details, visit
+
+# http://www.gradle.org/docs/current/userguide/multi_project_builds.html#sec:decoupled_projects
+
+# org.gradle.parallel=true
+
+ 
+
+# AndroidX package structure to make it clearer which packages are bundled with the
+
+# Android operating system, and which are packaged with your app's APK
+
+# https://developer.android.com/topic/libraries/support-library/androidx-rn
+
+android.useAndroidX=true
+
+ 
+
+# Kotlin code style for this project: "official" or "obsolete":
+
+kotlin.code.style=official
+
+ 
+
+# Enables namespacing of each library's R class so that its R class includes only the
+
+# resources declared in the library itself and none from the library's dependencies,
+
+# thereby reducing the size of the R class for that library
+
+android.nonTransitiveRClass=true
+
+ 
+
+Bash
+gradle wrapper --gradle-version=8.7 2>&1 || echo "Gradle not found, trying alternative"
+
+BUILD FAILED in 30s
+Gradle not found, trying alternative
+... +23 lines
+Let me fix the Android Gradle plugin version:
+
+Edit
+/home/user/ThreeTen-EthiopicChrono/build.gradle.kts
+<tool_use_error>File has not been read yet. Read it first before writing to it.</tool_use_error>
+Read
+/home/user/ThreeTen-EthiopicChrono/build.gradle.kts
+Read 12 lines
+Edit
+/home/user/ThreeTen-EthiopicChrono/build.gradle.kts
+// Top-level build file where you can add configuration options common to all sub-projects/modules.
+
+plugins {
+
+    id("com.android.library") version "8.7.3" apply false
+
+    id("com.android.library") version "8.2.2" apply false
+
+    id("org.jetbrains.kotlin.plugin.compose") version "2.0.21" apply false
+
+    id("org.jetbrains.kotlin.plugin.serialization") version "2.0.21" apply false
+
+}
+
+Now let me try to build the library. First let me create gradle wrapper files manually:
+
+
+If the build failed:  will try it with 
+
+
+
+id("com.android.library") version "8.7.3" apply false
+ 
